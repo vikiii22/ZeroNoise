@@ -4,6 +4,7 @@ export interface IEvent extends Document {
   title: string;
   category: 'Games' | 'Creativity' | 'DIY' | 'Movement';
   physicalReference: string;
+  mapUrl?: string;
   startTime: Date;
   creatorId: mongoose.Types.ObjectId;
   attendees: mongoose.Types.ObjectId[];
@@ -17,6 +18,7 @@ const EventSchema: Schema = new Schema({
   title: { type: String, required: true },
   category: { type: String, enum: ['Games', 'Creativity', 'DIY', 'Movement'], required: true },
   physicalReference: { type: String, required: true },
+  mapUrl: { type: String },
   startTime: { type: Date, required: true },
   creatorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   attendees: [{ type: Schema.Types.ObjectId, ref: 'User' }],
