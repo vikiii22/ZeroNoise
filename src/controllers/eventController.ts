@@ -5,7 +5,7 @@ export const createEvent = async (req: Request, res: Response): Promise<void> =>
   try {
     const { title, category, physicalReference, mapUrl, startTime, location } = req.body;
 
-    if (!title || !category || !physicalReference || !startTime || !location) {
+    if (!title || !category || !startTime || !location) {
       res.status(400).json({ error: 'Todos los campos son requeridos' });
       return;
     }
@@ -20,7 +20,7 @@ export const createEvent = async (req: Request, res: Response): Promise<void> =>
       location
     });
 
-    const populated = await event.populate(['creatorId', 'attendees']);
+    const populated = await event.populate(['creatorId', 'attendees', 'category']);
     res.status(201).json(populated);
   } catch (error) {
     res.status(500).json({ error: 'Error al crear evento' });
@@ -65,7 +65,7 @@ export const getNearbyEvents = async (req: Request, res: Response): Promise<void
       filter.category = category;
     }
 
-    const events = await Event.find(filter).populate('creatorId', 'name').populate('attendees', 'name');
+    const events = await Event.find(filter).populate('creatorId', 'name').populate('attendees', 'name').populate('category');
 
     res.json(events);
   } catch (error) {
@@ -77,7 +77,8 @@ export const getAllEvents = async (req: Request, res: Response): Promise<void> =
   try {
     const events = await Event.find({ startTime: { $gte: new Date() } })
       .populate('creatorId', 'name')
-      .populate('attendees', 'name');
+      .populate('attendees', 'name')
+      .populate('category');
 
     res.json(events);
   } catch (error) {

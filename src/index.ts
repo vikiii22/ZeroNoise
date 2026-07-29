@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import eventRoutes from './routes/eventRoutes';
 import authRoutes from './routes/authRoutes';
+import categoryRoutes from './routes/categoryRoutes';
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 
 app.use('/api/events', eventRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/categories', categoryRoutes);
 
 app.get('/', (_req, res) => {
   res.json({ message: 'ZeroNoise API funcionando' });

@@ -2,8 +2,8 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IEvent extends Document {
   title: string;
-  category: 'Games' | 'Creativity' | 'DIY' | 'Movement';
-  physicalReference: string;
+  category: mongoose.Types.ObjectId;
+  physicalReference?: string;
   mapUrl?: string;
   startTime: Date;
   creatorId: mongoose.Types.ObjectId;
@@ -16,8 +16,8 @@ export interface IEvent extends Document {
 
 const EventSchema: Schema = new Schema({
   title: { type: String, required: true },
-  category: { type: String, enum: ['Games', 'Creativity', 'DIY', 'Movement'], required: true },
-  physicalReference: { type: String, required: true },
+  category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+  physicalReference: { type: String },
   mapUrl: { type: String },
   startTime: { type: Date, required: true },
   creatorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
