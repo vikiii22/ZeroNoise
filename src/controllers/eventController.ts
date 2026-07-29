@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Event from '../models/Event';
+import Category from '../models/Category';
 
 export const createEvent = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -10,9 +11,15 @@ export const createEvent = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
+    const cat = await Category.findOne({ name: category });
+    if (!cat) {
+      res.status(400).json({ error: 'Categoría no encontrada' });
+      return;
+    }
+
     const event = await Event.create({
       title,
-      category,
+      category: cat._id,
       physicalReference,
       mapUrl,
       startTime: new Date(startTime),
