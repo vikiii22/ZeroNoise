@@ -155,3 +155,87 @@ export const deleteEvent = async (req: Request, res: Response): Promise<void> =>
     res.status(500).json({ error: 'Error al eliminar evento' });
   }
 };
+
+export const joinEvent = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const event = await Event.findById(id);
+    if (!event) {
+      res.status(404).json({ error: 'Evento no encontrado' });
+      return;
+    }
+
+    const userId = req.userId!;
+
+    if (event.attendees.some(a => a.toString() === userId)) {
+      res.status(400).json({ error: 'Ya estás apuntado a este evento' });
+      return;
+    }
+
+    if (event.capacity && event.registeredCount >= event.capacity) {
+      res.status(400).json({ error: 'El evento está completo' });
+      return;
+    }
+
+    event.attendees.push(userId as any);
+    event.registeredCount += 1;
+    await event.save();
+
+    const populated = await event.populate(['creatorId', 'attendees', 'category']);
+    res.json(populated);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al apuntarse al evento' });
+  }
+};
+
+export const leaveEvent = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const event = await Event.findById(id);
+    if (!event) {
+      res.status(404).json({ error: 'Evento no encontrado' });
+      return;
+    }
+
+    const userId = req.userId!;
+
+    const index = event.attendees.findIndex(a => a.toString() === userId);
+    if (index === -1) {
+      res.status(400).json({ error: 'No estás apuntado a este evento' });
+      return;
+    }
+
+    event.attendees.splice(index, 1);
+    event.registeredCount = Math.max(0, event.registeredCount - 1);
+    await event.save();
+
+    const populated = await event.populate(['creatorId', 'attendees', 'category']);
+    res.json(populated);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al cancelar inscripción' });
+  }
+};
+
+export const getMyEvents = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.userId!;
+
+    const created = await Event.find({ creatorId: userId })
+      .populate('creatorId', 'name')
+      .populate('attendees', 'name')
+      .populate('category')
+      .sort({ startTime: 1 });
+
+    const joined = await Event.find({ attendees: userId, creatorId: { $ne: userId } })
+      .populate('creatorId', 'name')
+      .populate('attendees', 'name')
+      .populate('category')
+      .sort({ startTime: 1 });
+
+    res.json({ created, joined });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener tus eventos' });
+  }
+};

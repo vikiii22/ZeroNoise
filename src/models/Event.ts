@@ -6,6 +6,7 @@ export interface IEvent extends Document {
   physicalReference?: string;
   mapUrl?: string;
   capacity?: number;
+  registeredCount: number;
   startTime: Date;
   creatorId: mongoose.Types.ObjectId;
   attendees: mongoose.Types.ObjectId[];
@@ -21,6 +22,7 @@ const EventSchema: Schema = new Schema({
   physicalReference: { type: String },
   mapUrl: { type: String },
   capacity: { type: Number },
+  registeredCount: { type: Number, default: 0 },
   startTime: { type: Date, required: true },
   creatorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   attendees: [{ type: Schema.Types.ObjectId, ref: 'User' }],
